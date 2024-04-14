@@ -28,17 +28,17 @@ const int ALL_BUTTON_PINS[NUM_BUTTONS] = {
 // NB: As we are using GND and internal pull-ups then the "released" state of the button is "1".
 bool buttonStates[NUM_BUTTONS] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-USBMIDI_Interface midi;
+HairlessMIDI_Interface midi;
 
 void setup() {
-  Serial.begin(31250); // needs to be 31250 for MIDI
+  Serial.begin(115200); // needs to be 31250 for MIDI, 115200 for Hairless
   midi.begin();
 
   for (int i = 0; i < NUM_BUTTONS; i++) {
     pinMode(ALL_BUTTON_PINS[i], INPUT_PULLUP);
   }
 
-  Serial.println("Yeah we started");
+  // Serial.println("Yeah we started");
 }
 
 void loop() {
@@ -52,12 +52,12 @@ void loop() {
       buttonStates[i] = currentState;
 
       if (currentState == HIGH) {
-        Serial.print("Button released: ");
-        Serial.println(pinNumber);
-        midi.sendNoteOn(MIDIAddress(pinNumber), 127);
+        // Serial.print("Button released: ");
+        // Serial.println(pinNumber);
+        midi.sendNoteOff(MIDIAddress(pinNumber), 127);
       } else {
-        Serial.print("Button pressed: ");
-        Serial.println(pinNumber);
+        // Serial.print("Button pressed: ");
+        // Serial.println(pinNumber);
         midi.sendNoteOn(MIDIAddress(pinNumber), 127);
       }
     }

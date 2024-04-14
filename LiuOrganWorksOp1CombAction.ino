@@ -4,8 +4,6 @@
  *
  * Combination action
  */
- 
- #include <Control_Surface.h>
 
 const int NUM_BUTTONS = 55;
 const int ALL_BUTTON_PINS[NUM_BUTTONS] = {
@@ -28,11 +26,9 @@ const int ALL_BUTTON_PINS[NUM_BUTTONS] = {
 // NB: As we are using GND and internal pull-ups then the "released" state of the button is "1".
 bool buttonStates[NUM_BUTTONS] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-HairlessMIDI_Interface midi;
 
 void setup() {
   Serial.begin(115200); // needs to be 31250 for MIDI, 115200 for Hairless
-  midi.begin();
 
   for (int i = 0; i < NUM_BUTTONS; i++) {
     pinMode(ALL_BUTTON_PINS[i], INPUT_PULLUP);
@@ -54,14 +50,25 @@ void loop() {
       if (currentState == HIGH) {
         // Serial.print("Button released: ");
         // Serial.println(pinNumber);
-        midi.sendNoteOff(MIDIAddress(pinNumber), 127);
+        // midi.sendNoteOff(MIDIAddress(pinNumber), 127);
+        noteOn(0x80 /* note off */, pinNumber, 127);
       } else {
         // Serial.print("Button pressed: ");
         // Serial.println(pinNumber);
-        midi.sendNoteOn(MIDIAddress(pinNumber), 127);
+        // midi.sendNoteOn(MIDIAddress(pinNumber), 127);
+        noteOn(0x90 /* note on */, pinNumber, 127);
       }
     }
   }
 
-  midi.update();
+  // midi.update();
+  delay(10);
+}
+
+//  plays a MIDI note.  Doesn't check to see that
+//  cmd is greater than 127, or that data values are  less than 127:
+void noteOn(int cmd, int pitch, int velocity) {
+  Serial.write(cmd);
+  Serial.write(pitch);
+  Serial.write(velocity);
 }

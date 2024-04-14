@@ -20,7 +20,8 @@ const int ALL_BUTTON_PINS[NUM_BUTTONS] = {
   18, // Setter
   19 // General cancel
 };
-bool buttonStates[NUM_BUTTONS] = {0};
+// NB: As we are using GND and internal pull-ups then the "released" state of the button is "1".
+bool buttonStates[NUM_BUTTONS] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
 
 
@@ -47,18 +48,21 @@ void setup() {
 
 void loop() {
   for (int i = 0; i < NUM_BUTTONS; i++) {
-    bool currentState = digitalRead(ALL_BUTTON_PINS[i]);
+    int pinNumber = ALL_BUTTON_PINS[i];
+    bool currentState = digitalRead(pinNumber);
     bool lastState = buttonStates[i];
     
     if (currentState != lastState) {
       buttonStates[i] = currentState;
 
       if (currentState == HIGH) {
-        Serial.println("The state changed from LOW to HIGH for button " + ALL_BUTTON_PINS[i]);
-        MIDI.sendNoteOn(42, 127, 1);
+        Serial.print("Button released: ");
+        Serial.println(pinNumber);
+        MIDI.sendNoteOff(pinNumber, 127, 1);
       } else {
-        Serial.println("The state changed from HIGH to LOW for button " + ALL_BUTTON_PINS[i]);
-        MIDI.sendNoteOff(42, 127, 1);
+        Serial.print("Button pressed: ");
+        Serial.println(pinNumber);
+        MIDI.sendNoteOn(pinNumber, 127, 1);
       }
     }
   }

@@ -1,6 +1,11 @@
-// #include <Control_Surface.h>
-
-#include <MIDI.h>
+/***
+ * Liu Organ Works
+ * Opus 1
+ *
+ * Combination action
+ */
+ 
+ #include <Control_Surface.h>
 
 const int NUM_BUTTONS = 55;
 const int ALL_BUTTON_PINS[NUM_BUTTONS] = {
@@ -23,21 +28,11 @@ const int ALL_BUTTON_PINS[NUM_BUTTONS] = {
 // NB: As we are using GND and internal pull-ups then the "released" state of the button is "1".
 bool buttonStates[NUM_BUTTONS] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-
-
-/***
- * Liu Organ Works
- * Opus 1
- *
- * Combination action
- */
-
-// Define the MIDI interface
-MIDI_CREATE_DEFAULT_INSTANCE();
+USBMIDI_Interface midi;
 
 void setup() {
-  Serial.begin(31250); // for MIDI
-  MIDI.begin(MIDI_CHANNEL_OMNI);
+  Serial.begin(31250); // needs to be 31250 for MIDI
+  midi.begin();
 
   for (int i = 0; i < NUM_BUTTONS; i++) {
     pinMode(ALL_BUTTON_PINS[i], INPUT_PULLUP);
@@ -47,6 +42,7 @@ void setup() {
 }
 
 void loop() {
+
   for (int i = 0; i < NUM_BUTTONS; i++) {
     int pinNumber = ALL_BUTTON_PINS[i];
     bool currentState = digitalRead(pinNumber);
@@ -58,14 +54,14 @@ void loop() {
       if (currentState == HIGH) {
         Serial.print("Button released: ");
         Serial.println(pinNumber);
-        MIDI.sendNoteOff(pinNumber, 127, 1);
+        midi.sendNoteOn(MIDIAddress(pinNumber), 127);
       } else {
         Serial.print("Button pressed: ");
         Serial.println(pinNumber);
-        MIDI.sendNoteOn(pinNumber, 127, 1);
+        midi.sendNoteOn(MIDIAddress(pinNumber), 127);
       }
     }
   }
 
-  MIDI.read();
+  midi.update();
 }
